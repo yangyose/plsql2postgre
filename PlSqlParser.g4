@@ -84,6 +84,7 @@ unit_statement
     | data_manipulation_language_statements
     | drop_table
     | drop_view
+    | drop_synonym
     | drop_index
 
     | rename_object
@@ -2128,11 +2129,14 @@ upgrade_table_clause
     ;
 
 drop_table
-    : DROP TABLE tableview_name PURGE? SEMICOLON
+    : DROP TABLE tableview_name (CASCADE CONSTRAINTS)? PURGE? SEMICOLON
     ;
 
 drop_view
-    : DROP VIEW tableview_name (CASCADE CONSTRAINT)? SEMICOLON
+    : DROP VIEW tableview_name (CASCADE CONSTRAINTS)? SEMICOLON
+    ;
+drop_synonym
+    : DROP (PUBLIC)? SYNONYM synonym_name (FORCE)? SEMICOLON
     ;
 
 comment_on_column
@@ -4081,6 +4085,7 @@ sql_plus_command
     | START_CMD
     | whenever_command
     | set_command
+    | define_command
     ;
 
 whenever_command
@@ -4091,6 +4096,10 @@ whenever_command
 
 set_command
     : SET regular_id (CHAR_STRING | ON | OFF | /*EXACT_NUM_LIT*/numeric | regular_id)
+    ;
+    
+define_command
+    : (DEF | DEFINE) regular_id (EQUALS_OP (CHAR_STRING | numeric | regular_id))?
     ;
 
 // Common
@@ -4600,6 +4609,7 @@ outer_join_sign
 
 regular_id
     : REGULAR_ID
+    | (AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)+
     | non_reserved_keywords_pre12c
     | non_reserved_keywords_in_12c
     | A_LETTER
@@ -4741,6 +4751,7 @@ non_reserved_keywords_in_12c
     | DAYS
     | DB_UNIQUE_NAME
     | DECORRELATE
+    | DEF
     | DEFINE
     | DELEGATE
     | DELETE_ALL

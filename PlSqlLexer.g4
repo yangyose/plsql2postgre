@@ -379,6 +379,7 @@ DECR:                         'DECR';
 DECREMENT:                    'DECREMENT';
 DECRYPT:                      'DECRYPT';
 DEDUPLICATE:                  'DEDUPLICATE';
+DEF:                          'DEF';
 DEFAULT:                      'DEFAULT';
 DEFAULTS:                     'DEFAULTS';
 DEFERRABLE:                   'DEFERRABLE';

@@ -136,6 +136,12 @@ if __name__ == '__main__':
                       action='append',
                       help='seach path for Lexer/Parser files'
                       )
+    parser.add_option('-e', '--encoding',
+                      dest="encoding",
+                      default='utf-8',
+                      action='store',
+                      help='Set encoding of input file'
+                      )
 
     options, remainder = parser.parse_args()
 
@@ -239,7 +245,7 @@ if __name__ == '__main__':
     #############################################################
     for file_name in file_list:
         if os.path.exists(file_name) and os.path.isfile(file_name):
-            input_stream = FileStream(file_name, encoding='utf-8')
+            input_stream = FileStream(file_name, encoding=options.encoding)
             process(input_stream, class_lexer, class_parser)
         else:
             print("[ERROR] file {} not exist".format(os.path.normpath(file_name)))

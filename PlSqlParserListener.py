@@ -2906,6 +2906,15 @@ class PlSqlParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by PlSqlParser#drop_synonym.
+    def enterDrop_synonym(self, ctx:PlSqlParser.Drop_synonymContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#drop_synonym.
+    def exitDrop_synonym(self, ctx:PlSqlParser.Drop_synonymContext):
+        pass
+
+
     # Enter a parse tree produced by PlSqlParser#comment_on_column.
     def enterComment_on_column(self, ctx:PlSqlParser.Comment_on_columnContext):
         pass
@@ -6080,6 +6089,15 @@ class PlSqlParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by PlSqlParser#set_command.
     def exitSet_command(self, ctx:PlSqlParser.Set_commandContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#define_command.
+    def enterDefine_command(self, ctx:PlSqlParser.Define_commandContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#define_command.
+    def exitDefine_command(self, ctx:PlSqlParser.Define_commandContext):
         pass
 
 
