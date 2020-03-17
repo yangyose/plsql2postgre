@@ -2028,9 +2028,9 @@ table_compression
     ;
 
 physical_attributes_clause
-    : (PCTFREE pctfree=UNSIGNED_INTEGER
-      | PCTUSED pctused=UNSIGNED_INTEGER
-      | INITRANS inittrans=UNSIGNED_INTEGER
+    : (PCTFREE (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
+      | PCTUSED (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
+      | INITRANS (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
       | storage_clause
       )+
     ;
@@ -2065,6 +2065,30 @@ segment_attributes_clause
 
 physical_properties
     : deferred_segment_creation?  segment_attributes_clause table_compression?
+    | ORGANIZATION ( HEAP segment_attributes_clause? table_compression? 
+                   | INDEX segment_attributes_clause? index_org_table_clause
+                   | EXTERNAL external_table_clause
+                   )
+    ;
+
+external_table_clause
+    : '(' (TYPE access_driver_type)? external_data_properties ')' 
+      (REJECT LIMIT (UNSIGNED_INTEGER | UNLIMITED))?
+    ;
+    
+access_driver_type
+    : ORACLE_DATAPUMP
+    | ORACLE_LOADER
+    ;
+    
+external_data_properties
+    : DEFAULT DIRECTORY default_directory=regular_id
+      (ACCESS PARAMETERS ('(' opaque_format_spec ')'|USING CLOB subquery))?
+      LOCATION '(' (regular_id ':')? CHAR_STRING (',' (regular_id ':')? CHAR_STRING)* ')'
+    ;
+
+opaque_format_spec
+    : record_format_info? field_definitions? column_transforms?
     ;
 
 row_movement_clause
@@ -3892,6 +3916,7 @@ literal
     | string_function
     | numeric
     | MAXVALUE
+    | (AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)+
     ;
 
 numeric_function_wrapper
@@ -4873,6 +4898,8 @@ non_reserved_keywords_in_12c
     | ONE
     | ORA_CHECK_ACL
     | ORA_CHECK_PRIVILEGE
+    | ORACLE_DATAPUMP
+    | ORACLE_LOADER
     | ORA_CLUSTERING
     | ORA_INVOKING_USER
     | ORA_INVOKING_USERID

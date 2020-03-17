@@ -1175,6 +1175,8 @@ OPT_PARAM:                    'OPT_PARAM';
 ORA_BRANCH:                   'ORA_BRANCH';
 ORA_CHECK_ACL:                'ORA_CHECK_ACL';
 ORA_CHECK_PRIVILEGE:          'ORA_CHECK_PRIVILEGE';
+ORACLE_DATAPUMP:              'ORACLE_DATAPUMP';
+ORACLE_LOADER:                'ORACLE_LOADER';
 ORA_CLUSTERING:               'ORA_CLUSTERING';
 ORADATA:                      'ORADATA';
 ORADEBUG:                     'ORADEBUG';
@@ -2282,7 +2284,8 @@ APPROXIMATE_NUM_LIT: FLOAT_FRAGMENT ('E' ('+'|'-')? (FLOAT_FRAGMENT | [0-9]+))? 
 
 // Rule #--- <CHAR_STRING> is a base for Rule #065 <char_string_lit> , it incorporates <character_representation>
 // and a superfluous subtoken typecasting of the "QUOTE"
-CHAR_STRING: '\''  (~('\'' | '\r' | '\n') | '\'' '\'' | NEWLINE)* '\'';
+CHAR_STRING: '\''  (~('\'' | '\r' | '\n') | '\'' '\'' | NEWLINE)* '\''
+           | '""';
 
 // See https://livesql.oracle.com/apex/livesql/file/content_CIREYU9EA54EOKQ7LAMZKRF6P.html
 // TODO: context sensitive string quotes (any characted after quote)
