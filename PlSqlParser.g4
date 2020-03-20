@@ -393,7 +393,7 @@ create_type
 // Create Type Specific Clauses
 
 type_definition
-    : type_name (OID CHAR_STRING)? object_type_def?
+    : type_name (OID quoted_string)? object_type_def?
     ;
 
 object_type_def
@@ -692,7 +692,7 @@ index_subpartition_subclause
     ;
 
 odci_parameters
-    : CHAR_STRING
+    : quoted_string
     ;
 
 indextype
@@ -1249,7 +1249,7 @@ directory_name
     ;
 
 directory_path
-    : CHAR_STRING
+    : quoted_string
     ;
 
 // https://docs.oracle.com/cd/E11882_01/appdev.112/e25519/alter_library.htm#LNPLS99946
@@ -1406,7 +1406,7 @@ tablespace_logging_clauses
     ;
 
 tablespace_group_clause
-    : TABLESPACE GROUP (tablespace_group_name | CHAR_STRING)
+    : TABLESPACE GROUP (tablespace_group_name | quoted_string)
     ;
 
 tablespace_group_name
@@ -1454,7 +1454,7 @@ permanent_tablespace_clause
     ;
 
 tablespace_encryption_spec
-    : USING encrypt_algorithm=CHAR_STRING
+    : USING encrypt_algorithm=quoted_string
     ;
 
 logging_clause
@@ -1503,13 +1503,13 @@ tempfile_specification
     ;
 
 datafile_tempfile_spec
-    : (CHAR_STRING)? (SIZE size_clause)? REUSE? autoextend_clause?
+    : (quoted_string)? (SIZE size_clause)? REUSE? autoextend_clause?
     ;
 
 
 redo_log_file_spec
-    : (DATAFILE CHAR_STRING
-      | '(' ( ','? CHAR_STRING )+ ')'
+    : (DATAFILE quoted_string
+      | '(' ( ','? quoted_string )+ ')'
       )?
         (SIZE size_clause)?
         (BLOCKSIZE size_clause)?
@@ -2006,7 +2006,7 @@ lob_partitioning_storage
 
 datatype_null_enable
    : column_name datatype
-         SORT?  (DEFAULT expression)? (ENCRYPT ( USING  CHAR_STRING )? (IDENTIFIED BY REGULAR_ID)? CHAR_STRING? ( NO? SALT )? )?
+         SORT?  (DEFAULT expression)? (ENCRYPT ( USING  quoted_string )? (IDENTIFIED BY REGULAR_ID)? quoted_string? ( NO? SALT )? )?
          (NOT NULL_)? (ENABLE | DISABLE)?
    ;
 
@@ -2028,9 +2028,10 @@ table_compression
     ;
 
 physical_attributes_clause
-    : (PCTFREE (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
+    : ( PCTFREE (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
       | PCTUSED (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
       | INITRANS (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
+      | MAXTRANS (UNSIGNED_INTEGER | AMPERSAND UNSIGNED_INTEGER | AMPERSAND regular_id)
       | storage_clause
       )+
     ;
@@ -2047,6 +2048,7 @@ storage_clause
          | OPTIMAL (size_clause | NULL_ )
          | BUFFER_POOL (KEEP | RECYCLE | DEFAULT)
          | FLASH_CACHE (KEEP | NONE | DEFAULT)
+         | CELL_FLASH_CACHE (KEEP | NONE | DEFAULT)
          | ENCRYPT
          )+
        ')'
@@ -2065,10 +2067,10 @@ segment_attributes_clause
 
 physical_properties
     : deferred_segment_creation?  segment_attributes_clause table_compression?
-    | ORGANIZATION ( HEAP segment_attributes_clause? table_compression? 
-                   | INDEX segment_attributes_clause? index_org_table_clause
-                   | EXTERNAL external_table_clause
-                   )
+    | deferred_segment_creation? ORGANIZATION ( HEAP segment_attributes_clause? table_compression? 
+                                              | INDEX segment_attributes_clause? index_org_table_clause
+                                              | EXTERNAL external_table_clause
+                                              )
     ;
 
 external_table_clause
@@ -2084,11 +2086,79 @@ access_driver_type
 external_data_properties
     : DEFAULT DIRECTORY default_directory=regular_id
       (ACCESS PARAMETERS ('(' opaque_format_spec ')'|USING CLOB subquery))?
-      LOCATION '(' (regular_id ':')? CHAR_STRING (',' (regular_id ':')? CHAR_STRING)* ')'
+      LOCATION '(' (regular_id ':')? quoted_string (',' (regular_id ':')? quoted_string)* ')'
     ;
 
 opaque_format_spec
     : record_format_info? field_definitions? column_transforms?
+    ;
+
+record_format_info
+    : RECORDS ((FIXED | VARIABLE) UNSIGNED_INTEGER | DELIMITED BY (NEWLINE | quoted_string))
+      et_record_spec_options?
+    ;
+    
+et_record_spec_options
+    : ( CHARACTERSET quoted_string 
+      | PREPROCESSOR (regular_id ':')? quoted_string
+      | (LANGUAGE | TERRITORY) quoted_string
+      | DATA IS (LITTLE | BIG) ENDIAN
+      | BYTEORDERMARK (CHECK | NOCHECK) 
+      | STRING SIZES ARE IN (BYTES | CHARACTERS)
+      | LOAD WHEN condition 
+      | (NOBADFILE | BADFILE (regular_id ':')? quoted_string) 
+      | (NODISCARDFILE | DISCARDFILE (regular_id ':')? quoted_string) 
+      | (NOLOGFILE | LOGFILE (regular_id ':')? quoted_string) 
+      | (READSIZE UNSIGNED_INTEGER | DISABLE_DIRECTORY_LINK_CHECK | (DATE_CACHE | SKIP_) UNSIGNED_INTEGER)
+      | IO_OPTIONS '(' (DIRECTIO | NODIRECTIO) ')'
+      )+
+    ;
+    
+field_definitions
+    : FIELDS IGNORE_CHARS_AFTER_EOR? delim_spec? trim_spec?
+      (MISSING FIELD VALUES ARE NULL_)?
+      (REJECT ROWS WITH ALL NULL_ FIELDS)?
+      field_list?
+    ;
+    
+delim_spec
+    : ( ENCLOSED BY quoted_string (AND quoted_string)? 
+      | TERMINATED BY (quoted_string | WHITESPACE) (OPTIONALLY? ENCLOSED BY quoted_string (AND quoted_string)?)?
+      )
+    ;
+    
+trim_spec
+    : (LRTRIM | NOTRIM | LTRIM | RTRIM | LDRTRIM)
+    ;
+    
+field_list
+    : '(' regular_id pos_spec? datatype? init_spec? 
+      (',' regular_id pos_spec? datatype? init_spec?)*
+      ')'
+    ;
+    
+pos_spec
+    : POSITION? '(' ('*' | ('+' | '-')? UNSIGNED_INTEGER) (':' | '-') UNSIGNED_INTEGER ')'
+    ;
+
+init_spec
+    : (DEFAULTIF | NULLIF) condition
+    ;
+
+column_transforms
+    : COLUMN TRANSFORMS '(' transform (',' transform)* ')'
+    ;
+
+transform
+    : regular_id FROM ( NULL_ 
+                      | CONSTANT quoted_string 
+                      | CONCAT '(' (regular_id | CONSTANT quoted_string) (',' (regular_id | CONSTANT quoted_string))* ')'
+                      | LOBFILE '(' (regular_id | CONSTANT quoted_string ':') (',' (regular_id | CONSTANT quoted_string ':'))* ')' lobfile_attr_list? 
+                      )
+    ;
+    
+lobfile_attr_list
+    : FROM '(' regular_id (',' regular_id)* ')' | CLOB | BLOB | CHARACTERSET '=' quoted_string
     ;
 
 row_movement_clause
@@ -2129,7 +2199,7 @@ supplemental_id_key_clause
 allocate_extent_clause
     : ALLOCATE EXTENT
        ( '(' ( SIZE size_clause
-             | DATAFILE datafile=CHAR_STRING
+             | DATAFILE datafile=quoted_string
              | INSTANCE inst_num=UNSIGNED_INTEGER
              )+
          ')'
@@ -2252,8 +2322,8 @@ begin_or_end
     ;
 
 general_recovery
-    : RECOVER AUTOMATIC? (FROM CHAR_STRING)?
-       ( (full_database_recovery | partial_database_recovery | LOGFILE CHAR_STRING )?
+    : RECOVER AUTOMATIC? (FROM quoted_string)?
+       ( (full_database_recovery | partial_database_recovery | LOGFILE quoted_string )?
          ((TEST | ALLOW UNSIGNED_INTEGER CORRUPTION | parallel_clause)+ )?
        | CONTINUE DEFAULT?
        | CANCEL
@@ -2263,7 +2333,7 @@ general_recovery
 //Need to come back to
 full_database_recovery
     : STANDBY? DATABASE
-          ((UNTIL (CANCEL |TIME CHAR_STRING | CHANGE UNSIGNED_INTEGER | CONSISTENT)
+          ((UNTIL (CANCEL |TIME quoted_string | CHANGE UNSIGNED_INTEGER | CONSISTENT)
            | USING BACKUP CONTROLFILE
            )+
           )?
@@ -2271,14 +2341,14 @@ full_database_recovery
 
 partial_database_recovery
     : TABLESPACE tablespace (',' tablespace)*
-    | DATAFILE CHAR_STRING | filenumber (',' CHAR_STRING | filenumber)*
+    | DATAFILE quoted_string | filenumber (',' quoted_string | filenumber)*
     | partial_database_recovery_10g
     ;
 
 partial_database_recovery_10g
     : {isVersion10()}? STANDBY
       ( TABLESPACE tablespace (',' tablespace)*
-      | DATAFILE CHAR_STRING | filenumber (',' CHAR_STRING | filenumber)*
+      | DATAFILE quoted_string | filenumber (',' quoted_string | filenumber)*
       )
       UNTIL (CONSISTENT WITH)? CONTROLFILE
     ;
@@ -2350,7 +2420,7 @@ logfile_clauses
 add_logfile_clauses
     : ADD STANDBY? LOGFILE
              (
-//TODO        (INSTANCE CHAR_STRING | THREAD UNSIGNED_INTEGER)?
+//TODO        (INSTANCE quoted_string | THREAD UNSIGNED_INTEGER)?
                (log_file_group   redo_log_file_spec)+
              | MEMBER filename REUSE? (',' filename REUSE?)* TO logfile_descriptor (',' logfile_descriptor)*
              )
@@ -2470,11 +2540,11 @@ default_settings_clause
     ;
 
 set_time_zone_clause
-    : SET TIMEZONE EQUALS_OP CHAR_STRING
+    : SET TIMEZONE EQUALS_OP quoted_string
     ;
 
 instance_clauses
-    : enable_or_disable INSTANCE CHAR_STRING
+    : enable_or_disable INSTANCE quoted_string
     ;
 
 security_clause
@@ -2498,7 +2568,7 @@ filenumber
     ;
 
 filename
-    : CHAR_STRING
+    : quoted_string
     ;
 
 alter_table
@@ -2521,7 +2591,7 @@ alter_table_properties
     | shrink_clause
     | READ ONLY
     | READ WRITE
-    | REKEY CHAR_STRING
+    | REKEY quoted_string
     ;
 
 alter_table_properties_1
@@ -2769,7 +2839,7 @@ lob_retention_clause
     ;
 
 encryption_spec
-    : (USING  CHAR_STRING)? (IDENTIFIED BY REGULAR_ID)? CHAR_STRING? (NO? SALT)?
+    : (USING  quoted_string)? (IDENTIFIED BY REGULAR_ID)? quoted_string? (NO? SALT)?
     ;
 tablespace
     : regular_id
@@ -2801,7 +2871,7 @@ end_time_column
 
 column_definition
     : column_name (datatype | type_name)
-         SORT?  (DEFAULT expression)? (ENCRYPT (USING  CHAR_STRING)? (IDENTIFIED BY regular_id)? CHAR_STRING? (NO? SALT)? )?  (inline_constraint* | inline_ref_constraint)
+         SORT?  (DEFAULT expression)? (ENCRYPT (USING  quoted_string)? (IDENTIFIED BY regular_id)? quoted_string? (NO? SALT)? )?  (inline_constraint* | inline_ref_constraint)
     ;
 
 virtual_column_definition
@@ -2940,11 +3010,11 @@ call_spec
 // Call Spec Specific Clauses
 
 java_spec
-    : JAVA NAME CHAR_STRING
+    : JAVA NAME quoted_string
     ;
 
 c_spec
-    : C_LETTER (NAME CHAR_STRING)? LIBRARY identifier c_agent_in_clause? (WITH CONTEXT)? c_parameters_clause?
+    : C_LETTER (NAME quoted_string)? LIBRARY identifier c_agent_in_clause? (WITH CONTEXT)? c_parameters_clause?
     ;
 
 c_agent_in_clause
@@ -3912,7 +3982,7 @@ standard_function
     ;
 
 literal
-    : CHAR_STRING
+    : quoted_string
     | string_function
     | numeric
     | MAXVALUE
@@ -4120,11 +4190,11 @@ whenever_command
     ;
 
 set_command
-    : SET regular_id (CHAR_STRING | ON | OFF | /*EXACT_NUM_LIT*/numeric | regular_id)
+    : SET regular_id (quoted_string | ON | OFF | /*EXACT_NUM_LIT*/numeric | regular_id)
     ;
     
 define_command
-    : (DEF | DEFINE) regular_id (EQUALS_OP (CHAR_STRING | numeric | regular_id))?
+    : (DEF | DEFINE) regular_id (EQUALS_OP (quoted_string | numeric | regular_id))?
     ;
 
 // Common
@@ -4641,34 +4711,55 @@ regular_id
     | AGENT
     | AGGREGATE
     | ANALYZE
+    | ARE
     | AUTONOMOUS_TRANSACTION
+    | BADFILE
     | BATCH
     | BINARY_INTEGER
     | BOOLEAN
+    | BYTES
     | C_LETTER
     | CHAR
+    | CHARACTERS
     | CLUSTER
     | CONSTRUCTOR
     | CUSTOMDATUM
+    | DATE_CACHE
     | DECIMAL
+    | DEFAULTIF
     | DELETE
     | DETERMINISTIC
+    | DIRECTIO
+    | DISABLE_DIRECTORY_LINK_CHECK
+    | DISCARDFILE
     | DSINTERVAL_UNCONSTRAINED
+    | ENCLOSED
     | ERR
     | EXCEPTION
     | EXCEPTION_INIT
     | EXCEPTIONS
     | EXISTS
     | EXIT
+    | FIELD
+    | FIELDS
     | FLOAT
     | FORALL
     | INDICES
     | INOUT
     | INTEGER
+    | IGNORE_CHARS_AFTER_EOR
+    | IO_OPTIONS
     | LANGUAGE
+    | LOBFILE
     | LONG
     | LOOP
+    | MISSING
+    | NOBADFILE
+    | NODIRECTIO
+    | NODISCARDFILE
+    | NOLOGFILE
     | NUMBER
+    | OPTIONALLY
     | ORADATA
     | OSERROR
     | OUT
@@ -4676,12 +4767,15 @@ regular_id
     | PARALLEL_ENABLE
     | PIPELINED
     | PLS_INTEGER
+    | POSITION
     | POSITIVE
     | POSITIVEN
     | PRAGMA
     | RAISE
     | RAW
+    | READSIZE
     | RECORD
+    | RECORDS
     | REF
     | RENAME
     | RESTRICT_REFERENCES
@@ -4691,19 +4785,23 @@ regular_id
     | SET
     | SIGNTYPE
     | SIMPLE_INTEGER
+    | SIZES
     | SMALLINT
     | SQLDATA
     | SQLERROR
     | SUBTYPE
+    | TERMINATED
     | TIMESTAMP_LTZ_UNCONSTRAINED
     | TIMESTAMP_TZ_UNCONSTRAINED
     | TIMESTAMP_UNCONSTRAINED
+    | TRANSFORMS
     | TRIGGER
     | VARCHAR
     | VARCHAR2
     | VARIABLE
     | WARNING
     | WHILE
+    | WITH
     | XMLAGG
     | YMINTERVAL_UNCONSTRAINED
     | REGR_
@@ -4808,6 +4906,7 @@ non_reserved_keywords_in_12c
     | FEATURE_DETAILS
     | FETCH
     | FILE_NAME_CONVERT
+    | FIXED
     | FIXED_VIEW_DATA
     | FORMAT
     | GATHER_OPTIMIZER_STATISTICS
@@ -5100,6 +5199,7 @@ non_reserved_keywords_pre12c
     | BEHALF
     | BFILE
     | BFILENAME
+    | BIG
     | BIGFILE
     | BINARY_DOUBLE_INFINITY
     | BINARY_DOUBLE
@@ -5135,6 +5235,7 @@ non_reserved_keywords_pre12c
     | BYPASS_RECURSIVE_CHECK
     | BYPASS_UJVC
     | BYTE
+    | BYTEORDERMARK
     | CACHE_CB
     | CACHE_INSTANCES
     | CACHE
@@ -5154,6 +5255,7 @@ non_reserved_keywords_pre12c
     | CHANGE_DUPKEY_ERROR_INDEX
     | CHANGE
     | CHARACTER
+    | CHARACTERSET
     | CHAR_CS
     | CHARTOROWID
     | CHECK_ACL_REWRITE
@@ -5295,6 +5397,7 @@ non_reserved_keywords_pre12c
     | DEGREE
     | DELAY
     | DELETEXML
+    | DELIMITED
     | DEMAND
     | DENSE_RANKM
     | DENSE_RANK
@@ -5355,6 +5458,7 @@ non_reserved_keywords_pre12c
     | ENCODING
     | ENCRYPTION
     | ENCRYPT
+    | ENDIAN
     | END_OUTLINE_DATA
     | ENFORCED
     | ENFORCE
@@ -5579,6 +5683,7 @@ non_reserved_keywords_pre12c
     | LDAP_REGISTRATION_ENABLED
     | LDAP_REGISTRATION
     | LDAP_REG_SYNC_INTERVAL
+    | LDRTRIM
     | LEADING
     | LEAD
     | LEAST
@@ -5602,6 +5707,7 @@ non_reserved_keywords_pre12c
     | LINK
     | LISTAGG
     | LIST
+    | LITTLE
     | LN
     | LNNVL
     | LOAD
@@ -5629,6 +5735,7 @@ non_reserved_keywords_pre12c
     | LOW
     | LPAD
     | LTRIM
+    | LRTRIM
     | MAIN
     | MAKE_REF
     | MANAGED
@@ -5724,6 +5831,7 @@ non_reserved_keywords_pre12c
     | NETWORK
     | NEVER
     | NEW
+    | NEWLINE
     | NEW_TIME
     | NEXT_DAY
     | NEXT
@@ -5764,6 +5872,7 @@ non_reserved_keywords_pre12c
     | NO_BUFFER
     | NOCACHE
     | NO_CARTESIAN
+    | NOCHECK
     | NO_CHECK_ACL_REWRITE
     | NO_CLUSTER_BY_ROWID
     | NO_COALESCE_SQ
@@ -5866,6 +5975,7 @@ non_reserved_keywords_pre12c
     | NOTHING
     | NOTIFICATION
     | NO_TRANSFORM_DISTINCT_AGG
+    | NOTRIM
     | NO_UNNEST
     | NO_USE_HASH_AGGREGATION
     | NO_USE_HASH_GBY_FOR_PUSHDOWN
@@ -6027,6 +6137,7 @@ non_reserved_keywords_pre12c
     | PREDICTION_PROBABILITY
     | PREDICTION_SET
     | PREPARE
+    | PREPROCESSOR
     | PRESENT
     | PRESENTNNV
     | PRESENTV
@@ -6577,6 +6688,7 @@ non_reserved_keywords_pre12c
     | TEMPLATE
     | TEMPORARY
     | TEMP_TABLE
+    | TERRITORY
     | TEST
     | THAN
     | THE

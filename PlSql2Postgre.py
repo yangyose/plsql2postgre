@@ -13,7 +13,7 @@ DEFAULT_FILE_NAME = '.\work\output.postgre.sql'
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        input_stream = FileStream(sys.argv[1], encoding = 'utf-8')
+        input_stream = FileStream(sys.argv[1], encoding = 'ansi')
         file_name, file_ext = os.path.splitext(sys.argv[1])
         output_file = file_name + '.postgre' + file_ext
     else:

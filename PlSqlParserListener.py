@@ -2789,6 +2789,141 @@ class PlSqlParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by PlSqlParser#external_table_clause.
+    def enterExternal_table_clause(self, ctx:PlSqlParser.External_table_clauseContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#external_table_clause.
+    def exitExternal_table_clause(self, ctx:PlSqlParser.External_table_clauseContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#access_driver_type.
+    def enterAccess_driver_type(self, ctx:PlSqlParser.Access_driver_typeContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#access_driver_type.
+    def exitAccess_driver_type(self, ctx:PlSqlParser.Access_driver_typeContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#external_data_properties.
+    def enterExternal_data_properties(self, ctx:PlSqlParser.External_data_propertiesContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#external_data_properties.
+    def exitExternal_data_properties(self, ctx:PlSqlParser.External_data_propertiesContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#opaque_format_spec.
+    def enterOpaque_format_spec(self, ctx:PlSqlParser.Opaque_format_specContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#opaque_format_spec.
+    def exitOpaque_format_spec(self, ctx:PlSqlParser.Opaque_format_specContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#record_format_info.
+    def enterRecord_format_info(self, ctx:PlSqlParser.Record_format_infoContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#record_format_info.
+    def exitRecord_format_info(self, ctx:PlSqlParser.Record_format_infoContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#et_record_spec_options.
+    def enterEt_record_spec_options(self, ctx:PlSqlParser.Et_record_spec_optionsContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#et_record_spec_options.
+    def exitEt_record_spec_options(self, ctx:PlSqlParser.Et_record_spec_optionsContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#field_definitions.
+    def enterField_definitions(self, ctx:PlSqlParser.Field_definitionsContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#field_definitions.
+    def exitField_definitions(self, ctx:PlSqlParser.Field_definitionsContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#delim_spec.
+    def enterDelim_spec(self, ctx:PlSqlParser.Delim_specContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#delim_spec.
+    def exitDelim_spec(self, ctx:PlSqlParser.Delim_specContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#trim_spec.
+    def enterTrim_spec(self, ctx:PlSqlParser.Trim_specContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#trim_spec.
+    def exitTrim_spec(self, ctx:PlSqlParser.Trim_specContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#field_list.
+    def enterField_list(self, ctx:PlSqlParser.Field_listContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#field_list.
+    def exitField_list(self, ctx:PlSqlParser.Field_listContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#pos_spec.
+    def enterPos_spec(self, ctx:PlSqlParser.Pos_specContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#pos_spec.
+    def exitPos_spec(self, ctx:PlSqlParser.Pos_specContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#init_spec.
+    def enterInit_spec(self, ctx:PlSqlParser.Init_specContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#init_spec.
+    def exitInit_spec(self, ctx:PlSqlParser.Init_specContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#column_transforms.
+    def enterColumn_transforms(self, ctx:PlSqlParser.Column_transformsContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#column_transforms.
+    def exitColumn_transforms(self, ctx:PlSqlParser.Column_transformsContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#transform.
+    def enterTransform(self, ctx:PlSqlParser.TransformContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#transform.
+    def exitTransform(self, ctx:PlSqlParser.TransformContext):
+        pass
+
+
+    # Enter a parse tree produced by PlSqlParser#lobfile_attr_list.
+    def enterLobfile_attr_list(self, ctx:PlSqlParser.Lobfile_attr_listContext):
+        pass
+
+    # Exit a parse tree produced by PlSqlParser#lobfile_attr_list.
+    def exitLobfile_attr_list(self, ctx:PlSqlParser.Lobfile_attr_listContext):
+        pass
+
+
     # Enter a parse tree produced by PlSqlParser#row_movement_clause.
     def enterRow_movement_clause(self, ctx:PlSqlParser.Row_movement_clauseContext):
         pass
