@@ -1074,7 +1074,7 @@ storage_table_clause
 
 // https://docs.oracle.com/database/121/SQLRF/statements_4008.htm#SQLRF56110
 unified_auditing
-    : {isVersion12()}?
+    : {self.isVersion12()}?
       AUDIT (POLICY policy_name ((BY | EXCEPT) audit_user (',' audit_user)* )?
                                 (WHENEVER NOT? SUCCESSFUL)?
             | CONTEXT NAMESPACE oracle_namespace
@@ -1102,11 +1102,11 @@ audit_traditional
     ;
 
 audit_direct_path
-    : {isVersion12()}? DIRECT_PATH auditing_by_clause
+    : {self.isVersion12()}? DIRECT_PATH auditing_by_clause
     ;
 
 audit_container_clause
-    : {isVersion12()}? (CONTAINER EQUALS_OP (CURRENT | ALL))
+    : {self.isVersion12()}? (CONTAINER EQUALS_OP (CURRENT | ALL))
     ;
 
 audit_operation_clause
@@ -1148,7 +1148,7 @@ auditing_on_clause
     : ON ( object_name
          | DIRECTORY regular_id
          | MINING MODEL model_name
-         | {isVersion12()}? SQL TRANSLATION PROFILE profile_name
+         | {self.isVersion12()}? SQL TRANSLATION PROFILE profile_name
          | DEFAULT
          )
     ;
@@ -1176,7 +1176,7 @@ sql_statement_shortcut
     | MATERIALIZED VIEW
     | NOT EXISTS
     | OUTLINE
-    | {isVersion12()}? PLUGGABLE DATABASE
+    | {self.isVersion12()}? PLUGGABLE DATABASE
     | PROCEDURE
     | PROFILE
     | PUBLIC DATABASE LINK
@@ -1263,11 +1263,11 @@ alter_library
     ;
 
 library_editionable
-    : {isVersion12()}? (EDITIONABLE | NONEDITIONABLE)
+    : {self.isVersion12()}? (EDITIONABLE | NONEDITIONABLE)
     ;
 
 library_debug
-    : {isVersion12()}? DEBUG
+    : {self.isVersion12()}? DEBUG
     ;
 
 
@@ -1301,7 +1301,7 @@ alter_view
     ;
 
 alter_view_editionable
-    : {isVersion12()}? (EDITIONABLE | NONEDITIONABLE)
+    : {self.isVersion12()}? (EDITIONABLE | NONEDITIONABLE)
     ;
 
 create_view
@@ -2346,7 +2346,7 @@ partial_database_recovery
     ;
 
 partial_database_recovery_10g
-    : {isVersion10()}? STANDBY
+    : {self.isVersion10()}? STANDBY
       ( TABLESPACE tablespace (',' tablespace)*
       | DATAFILE quoted_string | filenumber (',' quoted_string | filenumber)*
       )
@@ -2857,7 +2857,7 @@ column_properties
     ;
 
 period_definition
-    : {isVersion12()}? PERIOD FOR column_name
+    : {self.isVersion12()}? PERIOD FOR column_name
         ( '(' start_time_column ',' end_time_column ')' )?
     ;
 
@@ -4190,7 +4190,7 @@ whenever_command
     ;
 
 set_command
-    : SET regular_id (quoted_string | ON | OFF | /*EXACT_NUM_LIT*/numeric | regular_id)
+    : SET regular_id (quoted_string | ON | OFF | /*EXACT_NUM_LIT*/numeric | regular_id)?
     ;
     
 define_command
@@ -4758,6 +4758,7 @@ regular_id
     | NODIRECTIO
     | NODISCARDFILE
     | NOLOGFILE
+    | NULL_
     | NUMBER
     | OPTIONALLY
     | ORADATA

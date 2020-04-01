@@ -32,6 +32,7 @@ class PlSql2PostgreListener(PlSqlParserListener):
     def __init__(self, tokens:TokenStream):
         self.tokens = tokens
         self.rewriter = TokenStreamRewriter(tokens)
+        self.__query_elements = []
     
     # convert all remark comments to -- comments    
     def replaceEveryRemark(self):
@@ -68,16 +69,13 @@ class PlSql2PostgreListener(PlSqlParserListener):
         elif txt[:3].upper() == 'PRO':
             new_txt = r'\echo' + txt[3:]
             self.rewriter.replaceSingleToken(token, new_txt)
-        # convert show errors command to \errverbose
+        # convert 'show errors' command to \errverbose
         elif txt.upper() == 'SHOW':
-            for child in ctx.children:
-                if isinstance(child, TerminalNode):
-                    if child.symbol == ctx.start:
-                        new_txt = r'\errverbose'
-                    else:
-                        new_txt = ''
-                    self.rewriter.replaceSingleToken(child.symbol, new_txt)
-                    
+            new_txt = r'\errverbose'
+            self.rewriter.replaceSingleToken(token, new_txt)
+            token = ctx.stop
+            new_txt = ''
+            self.rewriter.replaceSingleToken(token, new_txt)
         
     # Exit a parse tree produced by PlSqlParser#whenever_command.
     def exitWhenever_command(self, ctx:PlSqlParser.Whenever_commandContext):
@@ -91,11 +89,47 @@ class PlSql2PostgreListener(PlSqlParserListener):
     # Exit a parse tree produced by PlSqlParser#set_command.
     def exitSet_command(self, ctx:PlSqlParser.Set_commandContext):
         token = ctx.start
+        txt = token.text
 
-        # convert set command to \set
-        new_txt = r'\set'
+        # at first comment set command
+        new_txt = '-- ' + txt
         self.rewriter.replaceSingleToken(token, new_txt)
-
+        
+        # then chang some system variable by postgre's manner
+        i = 1
+        var_name = ''
+        var_value = ''
+        for child in ctx.children:
+            if i == 2:
+                var_name = child.getText()
+            elif i == 3:
+                var_value = child.getText()
+                break
+            i += 1
+        token = ctx.stop
+        # autocommit config
+        if var_name.upper() in ('AUTO', 'AUTOCOMMIT'):
+            if var_value.upper() not in ('ON', 'OFF'):
+                var_value = 'on'
+            new_txt = '\r\n' + r'\set AUTOCOMMIT ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # colsep config
+        elif var_name.upper() == 'COLSEP':
+            new_txt = '\r\n' + r'\pset fieldsep ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # echo config
+        elif var_name.upper() == 'ECHO':
+            new_txt = '\r\n' + r'\set ECHO_HIDDEN ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # linesize config
+        elif var_name.upper() in ('LIN', 'LINESIZE'):
+            new_txt = '\r\n' + r'\pset columns ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # null text config
+        elif var_name.upper() == 'NULL':
+            new_txt = '\r\n' + r'\pset null ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        
     # Exit a parse tree produced by PlSqlParser#define_command.
     def exitDefine_command(self, ctx:PlSqlParser.Define_commandContext):
         # convert define command to \set and erase '=' sign
@@ -113,8 +147,9 @@ class PlSql2PostgreListener(PlSqlParserListener):
         token = ctx.start
         
         # convert variable's sign from '&' to ':'
-        new_txt = ':' if token.text == '&' else token.text
-        self.rewriter.replaceSingleToken(token, new_txt)
+        if token.text == '&':
+            new_txt = ':'
+            self.rewriter.replaceSingleToken(token, new_txt)
 
     # Exit a parse tree produced by PlSqlParser#native_datatype_element.
     def exitNative_datatype_element(self, ctx:PlSqlParser.Native_datatype_elementContext):
@@ -140,4 +175,67 @@ class PlSql2PostgreListener(PlSqlParserListener):
         # convert variable's sign from '&' to ':' in string
         new_txt = txt.replace('&', ':')
         self.rewriter.replaceSingleToken(token, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#logging_clause.
+    def exitLogging_clause(self, ctx:PlSqlParser.Logging_clauseContext):
+        token = ctx.start
+        
+        # comment logging clause
+        new_txt = r'/* ' + token.text + r' */' 
+        self.rewriter.replaceSingleToken(token, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#anonymous_block.
+    def exitAnonymous_block(self, ctx:PlSqlParser.Anonymous_blockContext):
+        # insert DO statement
+        token = ctx.start
+        new_txt = 'DO $$\r\n' + token.text
+        self.rewriter.replaceSingleToken(token, new_txt)
+        
+        token = ctx.stop
+        new_txt = '$$' + token.text
+        self.rewriter.replaceSingleToken(token, new_txt)
+        
+    # Enter a parse tree produced by PlSqlParser#query_block.
+    def enterQuery_block(self, ctx:PlSqlParser.Query_blockContext):
+        # allocate select statement's infomation area
+        query_element = {}
+        self.__query_elements.append(query_element)
+
+    # Enter a parse tree produced by PlSqlParser#selected_list.
+    def enterSelected_list(self, ctx:PlSqlParser.Selected_listContext):
+        if self.__query_elements:
+            query_element = self.__query_elements[-1]
+            select_list = []
+            for child in ctx.children:
+                if isinstance(child, TerminalNode):
+                    if child.symbol.text == '*':
+                        select_list.append(child.symbol.text)
+                else:
+                    select_list.append(child.getText())
+            query_element['select_list'] = select_list
+        
+    # Enter a parse tree produced by PlSqlParser#table_ref_list.
+    def enterTable_ref_list(self, ctx:PlSqlParser.Table_ref_listContext):
+        if self.__query_elements:
+            query_element = self.__query_elements[-1]
+            from_list = []
+            for child in ctx.children:
+                if not isinstance(child, TerminalNode): 
+                    from_list.append(child.getText())
+            query_element['from_list'] = from_list
+
+    # Enter a parse tree produced by PlSqlParser#where_clause.
+    def enterWhere_clause(self, ctx:PlSqlParser.Where_clauseContext):
+        if self.__query_elements:
+            query_element = self.__query_elements[-1]
+            where_list = ''
+            for child in ctx.children:
+                if child.getText() != 'WHERE':
+                    where_list = where_list + child.getText()
+            query_element['where_list'] = where_list
+
+    # Exit a parse tree produced by PlSqlParser#query_block.
+    def exitQuery_block(self, ctx:PlSqlParser.Query_blockContext):
+        query_element = self.__query_elements.pop()
+        #print(query_element)
                 
