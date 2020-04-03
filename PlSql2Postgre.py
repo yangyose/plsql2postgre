@@ -31,6 +31,6 @@ if __name__ == '__main__':
     walker.walk(listener, tree)
     
     f = open(output_file, 'wb')
-    out_stream = listener.rewriter.getDefaultText().encode('utf-8')
+    out_stream = listener.rewriter.getDefaultText().encode('ansi')
     f.write(out_stream)
     f.close()

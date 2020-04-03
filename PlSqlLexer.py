@@ -4206,9 +4206,9 @@ def serializedATN():
         buf.write("\13\u08e1\3\u08e1\3\u08e1\3\u08e2\3\u08e2\3\u08e2\3\u08e2")
         buf.write("\6\u08e2\u7571\n\u08e2\r\u08e2\16\u08e2\u7572\3\u08e2")
         buf.write("\3\u08e2\3\u08e3\3\u08e3\3\u08e4\3\u08e4\3\u08e5\3\u08e5")
-        buf.write("\3\u08e6\3\u08e6\3\u08e7\3\u08e7\3\u08e7\3\u08e8\3\u08e8")
+        buf.write("\3\u08e6\3\u08e6\3\u08e6\3\u08e7\3\u08e7\3\u08e8\3\u08e8")
         buf.write("\3\u08e9\3\u08e9\3\u08ea\3\u08ea\3\u08eb\3\u08eb\3\u08ec")
-        buf.write("\3\u08ec\3\u08ed\3\u08ed\3\u08ee\3\u08ee\3\u08ee\3\u08ef")
+        buf.write("\3\u08ec\3\u08ed\3\u08ed\3\u08ed\3\u08ee\3\u08ee\3\u08ef")
         buf.write("\3\u08ef\3\u08ef\3\u08ef\7\u08ef\u7595\n\u08ef\f\u08ef")
         buf.write("\16\u08ef\u7598\13\u08ef\3\u08ef\3\u08ef\3\u08ef\5\u08ef")
         buf.write("\u759d\n\u08ef\3\u08f0\3\u08f0\3\u08f0\3\u08f0\3\u08f0")
@@ -6215,9 +6215,9 @@ def serializedATN():
         buf.write("\u11bb\u7548\3\2\2\2\u11bd\u7551\3\2\2\2\u11bf\u755a\3")
         buf.write("\2\2\2\u11c1\u7563\3\2\2\2\u11c3\u756c\3\2\2\2\u11c5\u7576")
         buf.write("\3\2\2\2\u11c7\u7578\3\2\2\2\u11c9\u757a\3\2\2\2\u11cb")
-        buf.write("\u757c\3\2\2\2\u11cd\u757e\3\2\2\2\u11cf\u7581\3\2\2\2")
+        buf.write("\u757c\3\2\2\2\u11cd\u757f\3\2\2\2\u11cf\u7581\3\2\2\2")
         buf.write("\u11d1\u7583\3\2\2\2\u11d3\u7585\3\2\2\2\u11d5\u7587\3")
-        buf.write("\2\2\2\u11d7\u7589\3\2\2\2\u11d9\u758b\3\2\2\2\u11db\u758d")
+        buf.write("\2\2\2\u11d7\u7589\3\2\2\2\u11d9\u758b\3\2\2\2\u11db\u758e")
         buf.write("\3\2\2\2\u11dd\u759c\3\2\2\2\u11df\u75a6\3\2\2\2\u11e1")
         buf.write("\u75a8\3\2\2\2\u11e3\u75aa\3\2\2\2\u11e5\u75ac\3\2\2\2")
         buf.write("\u11e7\u75ae\3\2\2\2\u11e9\u75b0\3\2\2\2\u11eb\u75b2\3")
@@ -14746,15 +14746,15 @@ def serializedATN():
         buf.write("\3\2\2\2\u7571\u7572\3\2\2\2\u7572\u7570\3\2\2\2\u7572")
         buf.write("\u7573\3\2\2\2\u7573\u7574\3\2\2\2\u7574\u7575\7$\2\2")
         buf.write("\u7575\u11c4\3\2\2\2\u7576\u7577\7\'\2\2\u7577\u11c6\3")
-        buf.write("\2\2\2\u7578\u7579\7(\2\2\u7579\u11c8\3\2\2\2\u757a\u757b")
-        buf.write("\7*\2\2\u757b\u11ca\3\2\2\2\u757c\u757d\7+\2\2\u757d\u11cc")
-        buf.write("\3\2\2\2\u757e\u757f\7,\2\2\u757f\u7580\7,\2\2\u7580\u11ce")
-        buf.write("\3\2\2\2\u7581\u7582\7,\2\2\u7582\u11d0\3\2\2\2\u7583")
-        buf.write("\u7584\7-\2\2\u7584\u11d2\3\2\2\2\u7585\u7586\7/\2\2\u7586")
-        buf.write("\u11d4\3\2\2\2\u7587\u7588\7.\2\2\u7588\u11d6\3\2\2\2")
-        buf.write("\u7589\u758a\7\61\2\2\u758a\u11d8\3\2\2\2\u758b\u758c")
-        buf.write("\7B\2\2\u758c\u11da\3\2\2\2\u758d\u758e\7<\2\2\u758e\u758f")
-        buf.write("\7?\2\2\u758f\u11dc\3\2\2\2\u7590\u7591\7<\2\2\u7591\u7596")
+        buf.write("\2\2\2\u7578\u7579\7*\2\2\u7579\u11c8\3\2\2\2\u757a\u757b")
+        buf.write("\7+\2\2\u757b\u11ca\3\2\2\2\u757c\u757d\7,\2\2\u757d\u757e")
+        buf.write("\7,\2\2\u757e\u11cc\3\2\2\2\u757f\u7580\7,\2\2\u7580\u11ce")
+        buf.write("\3\2\2\2\u7581\u7582\7-\2\2\u7582\u11d0\3\2\2\2\u7583")
+        buf.write("\u7584\7/\2\2\u7584\u11d2\3\2\2\2\u7585\u7586\7.\2\2\u7586")
+        buf.write("\u11d4\3\2\2\2\u7587\u7588\7\61\2\2\u7588\u11d6\3\2\2")
+        buf.write("\2\u7589\u758a\7B\2\2\u758a\u11d8\3\2\2\2\u758b\u758c")
+        buf.write("\7<\2\2\u758c\u758d\7?\2\2\u758d\u11da\3\2\2\2\u758e\u758f")
+        buf.write("\7(\2\2\u758f\u11dc\3\2\2\2\u7590\u7591\7<\2\2\u7591\u7596")
         buf.write("\5\u120b\u0906\2\u7592\u7595\5\u120b\u0906\2\u7593\u7595")
         buf.write("\t\t\2\2\u7594\u7592\3\2\2\2\u7594\u7593\3\2\2\2\u7595")
         buf.write("\u7598\3\2\2\2\u7596\u7594\3\2\2\2\u7596\u7597\3\2\2\2")
@@ -17111,17 +17111,17 @@ class PlSqlLexer(PlSqlBaseLexer):
     CHAR_STRING = 2263
     DELIMITED_ID = 2264
     PERCENT = 2265
-    AMPERSAND = 2266
-    LEFT_PAREN = 2267
-    RIGHT_PAREN = 2268
-    DOUBLE_ASTERISK = 2269
-    ASTERISK = 2270
-    PLUS_SIGN = 2271
-    MINUS_SIGN = 2272
-    COMMA = 2273
-    SOLIDUS = 2274
-    AT_SIGN = 2275
-    ASSIGN_OP = 2276
+    LEFT_PAREN = 2266
+    RIGHT_PAREN = 2267
+    DOUBLE_ASTERISK = 2268
+    ASTERISK = 2269
+    PLUS_SIGN = 2270
+    MINUS_SIGN = 2271
+    COMMA = 2272
+    SOLIDUS = 2273
+    AT_SIGN = 2274
+    ASSIGN_OP = 2275
+    AMPERSAND = 2276
     BINDVAR = 2277
     NOT_EQUAL_OP = 2278
     CARRET_OPERATOR_PART = 2279
@@ -17682,8 +17682,8 @@ class PlSqlLexer(PlSqlBaseLexer):
             "'RATIO_TO_REPORT'", "'REGR_'", "'ROUND'", "'ROW_NUMBER'", "'SUBSTR'", 
             "'TO_CHAR'", "'TRIM'", "'SUM'", "'STDDEV'", "'VAR_'", "'VARIANCE'", 
             "'LEAST'", "'GREATEST'", "'TO_DATE'", "'..'", "'.'", "'%'", 
-            "'&'", "'('", "')'", "'**'", "'*'", "'+'", "'-'", "','", "'/'", 
-            "'@'", "':='", "'^'", "'~'", "'!'", "'>'", "'<'", "':'", "';'", 
+            "'('", "')'", "'**'", "'*'", "'+'", "'-'", "','", "'/'", "'@'", 
+            "':='", "'&'", "'^'", "'~'", "'!'", "'>'", "'<'", "':'", "';'", 
             "'|'", "'='", "'['", "']'", "'_'" ]
 
     symbolicNames = [ "<INVALID>",
@@ -18163,9 +18163,9 @@ class PlSqlLexer(PlSqlBaseLexer):
             "SUM", "STDDEV", "VAR_", "VARIANCE", "LEAST", "GREATEST", "TO_DATE", 
             "NATIONAL_CHAR_STRING_LIT", "BIT_STRING_LIT", "HEX_STRING_LIT", 
             "DOUBLE_PERIOD", "PERIOD", "UNSIGNED_INTEGER", "APPROXIMATE_NUM_LIT", 
-            "CHAR_STRING", "DELIMITED_ID", "PERCENT", "AMPERSAND", "LEFT_PAREN", 
-            "RIGHT_PAREN", "DOUBLE_ASTERISK", "ASTERISK", "PLUS_SIGN", "MINUS_SIGN", 
-            "COMMA", "SOLIDUS", "AT_SIGN", "ASSIGN_OP", "BINDVAR", "NOT_EQUAL_OP", 
+            "CHAR_STRING", "DELIMITED_ID", "PERCENT", "LEFT_PAREN", "RIGHT_PAREN", 
+            "DOUBLE_ASTERISK", "ASTERISK", "PLUS_SIGN", "MINUS_SIGN", "COMMA", 
+            "SOLIDUS", "AT_SIGN", "ASSIGN_OP", "AMPERSAND", "BINDVAR", "NOT_EQUAL_OP", 
             "CARRET_OPERATOR_PART", "TILDE_OPERATOR_PART", "EXCLAMATION_OPERATOR_PART", 
             "GREATER_THAN_OP", "LESS_THAN_OP", "COLON", "SEMICOLON", "BAR", 
             "EQUALS_OP", "LEFT_BRACKET", "RIGHT_BRACKET", "INTRODUCER", 
@@ -18698,9 +18698,9 @@ class PlSqlLexer(PlSqlBaseLexer):
                   "APPROXIMATE_NUM_LIT", "CHAR_STRING", "CHAR_STRING_PERL", 
                   "QS_ANGLE", "QS_BRACE", "QS_BRACK", "QS_PAREN", "QS_EXCLAM", 
                   "QS_SHARP", "QS_QUOTE", "QS_DQUOTE", "DELIMITED_ID", "PERCENT", 
-                  "AMPERSAND", "LEFT_PAREN", "RIGHT_PAREN", "DOUBLE_ASTERISK", 
-                  "ASTERISK", "PLUS_SIGN", "MINUS_SIGN", "COMMA", "SOLIDUS", 
-                  "AT_SIGN", "ASSIGN_OP", "BINDVAR", "NOT_EQUAL_OP", "CARRET_OPERATOR_PART", 
+                  "LEFT_PAREN", "RIGHT_PAREN", "DOUBLE_ASTERISK", "ASTERISK", 
+                  "PLUS_SIGN", "MINUS_SIGN", "COMMA", "SOLIDUS", "AT_SIGN", 
+                  "ASSIGN_OP", "AMPERSAND", "BINDVAR", "NOT_EQUAL_OP", "CARRET_OPERATOR_PART", 
                   "TILDE_OPERATOR_PART", "EXCLAMATION_OPERATOR_PART", "GREATER_THAN_OP", 
                   "LESS_THAN_OP", "COLON", "SEMICOLON", "BAR", "EQUALS_OP", 
                   "LEFT_BRACKET", "RIGHT_BRACKET", "INTRODUCER", "SINGLE_LINE_COMMENT", 

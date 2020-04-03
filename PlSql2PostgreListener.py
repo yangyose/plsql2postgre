@@ -1,3 +1,5 @@
+import re
+
 from antlr4                     import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -27,12 +29,14 @@ class PlSql2PostgreListener(PlSqlParserListener):
                     'ROWID'         :'OID',
                     'VARCHAR2'      :'VARCHAR'
                 }
+    EXT_FSERVER_NAME = 'PG_FILE_SERVER'
 
     # need rewriter to change token stream
     def __init__(self, tokens:TokenStream):
         self.tokens = tokens
         self.rewriter = TokenStreamRewriter(tokens)
         self.__query_elements = []
+        self.__crtl_elements = []
     
     # convert all remark comments to -- comments    
     def replaceEveryRemark(self):
@@ -45,6 +49,32 @@ class PlSql2PostgreListener(PlSqlParserListener):
                     new_txt = '--' + txt[3:]
                 self.rewriter.replaceSingleToken(token, new_txt)
 
+    def replaceBindVarInQuote(self, str):
+        if str[-1] != "'":
+            return str
+            
+        pattern = re.compile(r'([^&]*)(&[0-9]+|&[a-zA-Z][a-zA-Z0-9_]*)(.*)')
+        str_proc = str
+        str_ret = ""
+        result = pattern.match(str_proc)
+        if not result:
+            return str
+        while result:
+            if result.group(1) == "'":
+                str_ret = str_ret + ":'" + result.group(2)[1:]
+            else:
+                str_ret = str_ret + result.group(1) + "' || :'" + result.group(2)[1:]
+            if result.group(3) != "'":
+                str_proc = "'" + result.group(3)
+            else:
+                str_proc = result.group(3)
+            result = pattern.match(str_proc)
+        if str_proc == "'":
+            str_ret = str_ret + str_proc
+        else:
+            str_ret = str_ret + "' || '" + str_proc
+        return str_ret
+        
     # Exit a parse tree produced by PlSqlParser#sql_script.
     def exitSql_script(self, ctx:PlSqlParser.Sql_scriptContext):
         self.replaceEveryRemark()
@@ -129,6 +159,18 @@ class PlSql2PostgreListener(PlSqlParserListener):
         elif var_name.upper() == 'NULL':
             new_txt = '\r\n' + r'\pset null ' + var_value
             self.rewriter.insertAfterToken(token, new_txt) 
+        # pagesize config
+        elif var_name.upper() in ('PAGES', 'PAGESIZE'):
+            new_txt = '\r\n' + r'\pset pager_min_lines ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # recsepchar config
+        elif var_name.upper() == 'RECSEPCHAR':
+            new_txt = '\r\n' + r'\pset recordsep ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
+        # timing config
+        elif var_name.upper() in ('TIMI', 'TIMING'):
+            new_txt = '\r\n' + r'\timing ' + var_value
+            self.rewriter.insertAfterToken(token, new_txt) 
         
     # Exit a parse tree produced by PlSqlParser#define_command.
     def exitDefine_command(self, ctx:PlSqlParser.Define_commandContext):
@@ -150,6 +192,22 @@ class PlSql2PostgreListener(PlSqlParserListener):
         if token.text == '&':
             new_txt = ':'
             self.rewriter.replaceSingleToken(token, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#physical_attributes_clause.
+    def exitPhysical_attributes_clause(self, ctx:PlSqlParser.Physical_attributes_clauseContext):
+        # convert variable's sign from '&' to ':'
+        if ctx.AMPERSAND():
+            for child in ctx.AMPERSAND():
+                new_txt = ':'
+                self.rewriter.replaceSingleToken(child.symbol, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#literal.
+    def exitLiteral(self, ctx:PlSqlParser.LiteralContext):
+        # convert variable's sign from '&' to ':'
+        if ctx.AMPERSAND():
+            for child in ctx.AMPERSAND():
+                new_txt = ':'
+                self.rewriter.replaceSingleToken(child.symbol, new_txt)
 
     # Exit a parse tree produced by PlSqlParser#native_datatype_element.
     def exitNative_datatype_element(self, ctx:PlSqlParser.Native_datatype_elementContext):
@@ -173,7 +231,7 @@ class PlSql2PostgreListener(PlSqlParserListener):
         txt = token.text
         
         # convert variable's sign from '&' to ':' in string
-        new_txt = txt.replace('&', ':')
+        new_txt = self.replaceBindVarInQuote(txt)
         self.rewriter.replaceSingleToken(token, new_txt)
 
     # Exit a parse tree produced by PlSqlParser#logging_clause.
@@ -194,12 +252,17 @@ class PlSql2PostgreListener(PlSqlParserListener):
         token = ctx.stop
         new_txt = '$$' + token.text
         self.rewriter.replaceSingleToken(token, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#execute_immediate.
+    def exitExecute_immediate(self, ctx:PlSqlParser.Execute_immediateContext):
+        # delete keyword immediate
+        token = ctx.IMMEDIATE().symbol
+        self.rewriter.replaceSingleToken(token, '')
         
     # Enter a parse tree produced by PlSqlParser#query_block.
     def enterQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         # allocate select statement's infomation area
-        query_element = {}
-        self.__query_elements.append(query_element)
+        self.__query_elements.append({})
 
     # Enter a parse tree produced by PlSqlParser#selected_list.
     def enterSelected_list(self, ctx:PlSqlParser.Selected_listContext):
@@ -237,5 +300,47 @@ class PlSql2PostgreListener(PlSqlParserListener):
     # Exit a parse tree produced by PlSqlParser#query_block.
     def exitQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         query_element = self.__query_elements.pop()
-        #print(query_element)
-                
+
+    # Enter a parse tree produced by PlSqlParser#create_table.
+    def enterCreate_table(self, ctx:PlSqlParser.Create_tableContext):
+        # allocate create table statement's infomation area
+        self.__crtl_elements.append({'foreign_table':False,
+                                     'file_location':''})
+
+    # Enter a parse tree produced by PlSqlParser#external_table_clause.
+    def enterExternal_table_clause(self, ctx:PlSqlParser.External_table_clauseContext):
+        if self.__crtl_elements:
+            crtl_element = self.__crtl_elements[-1]
+            crtl_element['foreign_table'] = True
+
+    # Enter a parse tree produced by PlSqlParser#external_data_properties.
+    def enterExternal_data_properties(self, ctx:PlSqlParser.External_data_propertiesContext):
+        if self.__crtl_elements:
+            crtl_element = self.__crtl_elements[-1]
+            crtl_element['file_location'] = self.replaceBindVarInQuote(ctx.quoted_string()[0].getText())
+
+    # Exit a parse tree produced by PlSqlParser#physical_properties.
+    def exitPhysical_properties(self, ctx:PlSqlParser.Physical_propertiesContext):
+        if self.__crtl_elements:
+            crtl_element = self.__crtl_elements[-1]
+            if crtl_element['foreign_table']:
+                token = ctx.ORGANIZATION().symbol
+                new_txt = '/* ' + token.text
+                self.rewriter.replaceSingleToken(token, new_txt)
+                token = ctx.external_table_clause().stop
+                new_txt = token.text + ' */'
+                self.rewriter.replaceSingleToken(token, new_txt)
+                new_txt = '\r\nSERVER ' + self.EXT_FSERVER_NAME
+                new_txt = new_txt + '\r\nOPTIONS ('
+                new_txt = new_txt + "\r\n    FILENAME " + crtl_element['file_location']
+                new_txt = new_txt + '\r\n)'
+                self.rewriter.insertAfterToken(token, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#create_table.
+    def exitCreate_table(self, ctx:PlSqlParser.Create_tableContext):
+        crtl_element = self.__crtl_elements.pop()
+        if crtl_element['foreign_table']:
+           token = ctx.TABLE().symbol
+           new_txt = 'FOREIGN ' + token.text
+           self.rewriter.replaceSingleToken(token, new_txt)
+                           
