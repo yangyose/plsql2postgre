@@ -1,36 +1,43 @@
 import sys
 import os
 
-from antlr4 import *
-
+from antlr4                 import CommonTokenStream, ParseTreeWalker, FileStream, InputStream
 from PlSqlLexer             import PlSqlLexer
 from PlSqlParser            import PlSqlParser
 from PlSql2PostgreListener  import PlSql2PostgreListener
 from CaseChangingStream     import CaseChangingStream
 
+DEFAULT_ENCODING = 'ansi'
 DEFAULT_FILE_NAME = '.\work\output.postgre.sql'
 
+class PlSql2Postgre:
+
+    def __init__(self, stream):
+        self.__input_stream = stream
+
+    def run(self):
+        upper_stream = CaseChangingStream(self.__input_stream, True)
+        lexer = PlSqlLexer(upper_stream)
+        tokens = CommonTokenStream(lexer)
+        parser = PlSqlParser(tokens)
+        tree = parser.sql_script()
+
+        listener = PlSql2PostgreListener(tokens)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
+
+        return listener.rewriter.getDefaultText().encode(DEFAULT_ENCODING)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        input_stream = FileStream(sys.argv[1], encoding = 'ansi')
+        input_stream = FileStream(sys.argv[1], encoding = DEFAULT_ENCODING)
         file_name, file_ext = os.path.splitext(sys.argv[1])
         output_file = file_name + '.postgre' + file_ext
     else:
         input_stream = InputStream(sys.stdin.readline())
         output_file = DEFAULT_FILE_NAME
     
-    upper_stream = CaseChangingStream(input_stream, True)
-    lexer = PlSqlLexer(upper_stream)
-    tokens = CommonTokenStream(lexer)
-    parser = PlSqlParser(tokens)
-    tree = parser.sql_script()
-
-    listener = PlSql2PostgreListener(tokens)
-    walker = ParseTreeWalker()
-    walker.walk(listener, tree)
-    
     f = open(output_file, 'wb')
-    out_stream = listener.rewriter.getDefaultText().encode('ansi')
-    f.write(out_stream)
+    converter = PlSql2Postgre(input_stream)   
+    f.write(converter.run())
     f.close()
