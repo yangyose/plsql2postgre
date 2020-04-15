@@ -49,6 +49,7 @@ class PlSql2PostgreListener(PlSqlParserListener):
                     new_txt = '--' + txt[3:]
                 self.rewriter.replaceSingleToken(token, new_txt)
 
+    # replace bind variant in string constant
     def replaceBindVarInQuote(self, str):
         if str[-1] != "'":
             return str
@@ -74,6 +75,11 @@ class PlSql2PostgreListener(PlSqlParserListener):
         else:
             str_ret = str_ret + "' || '" + str_proc
         return str_ret
+
+    # comment the whole content
+    def commentContext(self, ctx):
+        self.rewriter.replaceSingleToken(ctx.start, '/* '+ctx.start.text)
+        self.rewriter.replaceSingleToken(ctx.stop, ctx.stop.text+' */')
         
     # Exit a parse tree produced by PlSqlParser#sql_script.
     def exitSql_script(self, ctx:PlSqlParser.Sql_scriptContext):
@@ -109,34 +115,23 @@ class PlSql2PostgreListener(PlSqlParserListener):
         
     # Exit a parse tree produced by PlSqlParser#whenever_command.
     def exitWhenever_command(self, ctx:PlSqlParser.Whenever_commandContext):
-        token = ctx.start
-        txt = token.text
-
-        # comment whenever command
-        new_txt = '-- ' + txt
-        self.rewriter.replaceSingleToken(token, new_txt)
+        self.commentContext(ctx)
         
     # Exit a parse tree produced by PlSqlParser#set_command.
     def exitSet_command(self, ctx:PlSqlParser.Set_commandContext):
-        token = ctx.start
-        txt = token.text
+        # comment whole command at first
+        self.commentContext(ctx)
 
-        # at first comment set command
-        new_txt = '-- ' + txt
-        self.rewriter.replaceSingleToken(token, new_txt)
-        
-        # then chang some system variable by postgre's manner
-        i = 1
+        # change some system variable by postgre's manner
+        child_num = len(ctx.children)
         var_name = ''
         var_value = ''
-        for child in ctx.children:
-            if i == 2:
-                var_name = child.getText()
-            elif i == 3:
-                var_value = child.getText()
-                break
-            i += 1
+        if child_num >= 2:
+            var_name = ctx.children[1].getText()
+        if child_num >= 3:
+            var_value = ctx.children[2].getText()
         token = ctx.stop
+        
         # autocommit config
         if var_name.upper() in ('AUTO', 'AUTOCOMMIT'):
             if var_value.upper() not in ('ON', 'OFF'):
@@ -183,6 +178,13 @@ class PlSql2PostgreListener(PlSqlParserListener):
                 elif child.symbol.text == '=':
                     new_txt = ''
                     self.rewriter.replaceSingleToken(child.symbol, new_txt)
+
+    # Exit a parse tree produced by PlSqlParser#string_function.
+    def exitString_function(self, ctx:PlSqlParser.String_functionContext):
+        fname_token = ctx.start
+        # change NVL function to COALESCE
+        if fname_token.text.upper() == 'NVL':
+            self.rewriter.replaceSingleToken(fname_token, 'COALESCE')
 
     # Exit a parse tree produced by PlSqlParser#regular_id.
     def exitRegular_id(self, ctx:PlSqlParser.Regular_idContext):
@@ -262,7 +264,9 @@ class PlSql2PostgreListener(PlSqlParserListener):
     # Enter a parse tree produced by PlSqlParser#query_block.
     def enterQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         # allocate select statement's infomation area
-        self.__query_elements.append({})
+        self.__query_elements.append({'select_list':[],
+                                      'from_list':[],
+                                      'where_list':[]})
 
     # Enter a parse tree produced by PlSqlParser#selected_list.
     def enterSelected_list(self, ctx:PlSqlParser.Selected_listContext):
@@ -300,6 +304,11 @@ class PlSql2PostgreListener(PlSqlParserListener):
     # Exit a parse tree produced by PlSqlParser#query_block.
     def exitQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         query_element = self.__query_elements.pop()
+        # if from dual then comment from clause 
+        if query_element['from_list'][0].upper() == 'DUAL':
+            from_ctx = ctx.from_clause()
+            self.rewriter.replaceSingleToken(from_ctx.start, '/* '+ from_ctx.start.text)
+            self.rewriter.replaceSingleToken(from_ctx.stop, from_ctx.stop.text+' */')
 
     # Enter a parse tree produced by PlSqlParser#create_table.
     def enterCreate_table(self, ctx:PlSqlParser.Create_tableContext):
