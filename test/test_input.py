@@ -1,9 +1,4 @@
-TEST_INSTR =    [' ',                                               #スペース
-                 '\t',                                              #タブ
-                 '\r\n',                                            #Windows式改行
-                 '\n',                                              #Unix式改行
-
-                 '--\r\n',                                          #シングルラインコメント - ハイフン内容なし
+TEST_INSTR =    ['--\r\n',                                          #シングルラインコメント - ハイフン内容なし
                  'rem\r\n',                                         #シングルラインコメント - rem内容なし
                  'remark\r\n',                                      #シングルラインコメント - remark内容なし
                  'REM\r\n',                                         #シングルラインコメント - REM内容なし
@@ -80,5 +75,42 @@ TEST_INSTR =    [' ',                                               #スペー�
                  'SET TIMI OFF\r\n',                                #SET TIMIコマンド
                  'set timing off\r\n',                              #set timingコマンド
                  'SET TIMING ON\r\n',                               #SET TIMINGコマンド
-                 'set feedback off\r\n'                             #setコマンド - 変換せずコメント
+                 'set feedback off\r\n',                            #setコマンド - 変換せずコメント
+                 'def ERR_CD = 1\r\n',                              #defコマンド - 数値セット
+                 "DEF ERR_CD = '1'\r\n",                            #DEFコマンド - 文字セット
+                 'define ERR_CD = errcd\r\n',                       #defineコマンド - 変数セット
+                 'DEFINE ERR_CD\r\n',                               #DEFINEコマンド - 定義のみ
+
+                 'SELECT NVL(SEQ_NO,0) FROM TEST_TBL;\r\n',         #NVL関数
+                 "SELECT nvl(SAM_STR,'') FROM TEST_TBL;\r\n",       #nvl関数
+                 "SELECT nvl(SAM_STR,NVL(NVL_STR,'')) FROM TEST_TBL;\r\n",
+                                                                    #NVL関数 - 二重ネスト
+
+                 'SELECT sysdate FROM DUAL;\r\n',                   #sysdateシステム変数
+                 "SELECT TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') FROM DUAL;\r\n",
+                                                                    #SYSDATEシステム変数
+                 'define ERR_CD = &1\r\n',                          #パラメータ変数 - セット
+                 'SELECT * FROM TEST_TBL WHERE SEQ_NO = &1;\r\n',   #パラメータ変数 - 数値引用
+                 "SELECT * FROM TEST_TBL WHERE SAM_STR = '&1';\r\n",#パラメータ変数 - 文字引用
+                 "SELECT '&1TEST' FROM DUAL;\r\n",                  #パラメータ変数 - 文字引用（先頭）
+                 "SELECT 'DROPTABLE&1CASCADE' FROM DUAL;\r\n",      #パラメータ変数 - 文字引用（中1回）
+                 "SELECT 'T&1T&2T' FROM DUAL;\r\n",                 #パラメータ変数 - 文字引用（中2回）
+                 "SELECT 'T&1&2T' FROM DUAL;\r\n",                  #パラメータ変数 - 文字引用（中2回連続）
+                 "SELECT 'TEST&1' FROM DUAL;\r\n",                  #パラメータ変数 - 文字引用（最後）
+                 'define ERR_CD = &errcd\r\n',                      #バインド変数 - セット
+                 'SELECT * FROM TEST_TBL WHERE SEQ_NO = &seqno;\r\n',
+                                                                    #バインド変数 - 数値引用
+                 "SELECT * FROM TEST_TBL WHERE SAM_STR = '&teststr';\r\n",
+                                                                    #バインド変数 - 文字引用
+                 "SELECT '&tblname TEST' FROM DUAL;\r\n",           #バインド変数 - 文字引用（先頭）
+                 "SELECT 'DROPTABLE&tblname CASCADE' FROM DUAL;\r\n",
+                                                                    #バインド変数 - 文字引用（中1回）
+                 "SELECT 'T&tname T&tname T' FROM DUAL;\r\n",       #バインド変数 - 文字引用（中2回）
+                 "SELECT 'T&tname&tname T' FROM DUAL;\r\n",         #バインド変数 - 文字引用（中2回連続）
+                 "SELECT 'TEST&tname' FROM DUAL;\r\n",              #バインド変数 - 文字引用（最後）
+
+                 ' ',                                               #スペース
+                 '\t',                                              #タブ
+                 '\r\n',                                            #Windows式改行
+                 '\n'                                               #Unix式改行
                 ]
