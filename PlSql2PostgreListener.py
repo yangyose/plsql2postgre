@@ -30,6 +30,7 @@ class PlSql2PostgreListener(PlSqlParserListener):
                     'VARCHAR2'      :'VARCHAR'
                 }
     EXT_FSERVER_NAME = 'PG_FILE_SERVER'
+    NEW_LINE = '\n'
 
     # need rewriter to change token stream
     def __init__(self, tokens:TokenStream):
@@ -129,28 +130,28 @@ class PlSql2PostgreListener(PlSqlParserListener):
         if var_name.upper() in ('AUTO', 'AUTOCOMMIT'):
             if var_value.upper() not in ('ON', 'OFF'):
                 var_value = 'on'
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\set AUTOCOMMIT ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\set AUTOCOMMIT ' + var_value) 
         # colsep config
         elif var_name.upper() == 'COLSEP':
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\pset fieldsep ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\pset fieldsep ' + var_value) 
         # echo config
         elif var_name.upper() == 'ECHO':
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\set ECHO_HIDDEN ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\set ECHO_HIDDEN ' + var_value) 
         # linesize config
         elif var_name.upper() in ('LIN', 'LINESIZE'):
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\pset columns ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\pset columns ' + var_value) 
         # null text config
         elif var_name.upper() == 'NULL':
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\pset null ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\pset null ' + var_value) 
         # pagesize config
         elif var_name.upper() in ('PAGES', 'PAGESIZE'):
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\pset pager_min_lines ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\pset pager_min_lines ' + var_value) 
         # recsepchar config
         elif var_name.upper() == 'RECSEPCHAR':
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\pset recordsep ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\pset recordsep ' + var_value) 
         # timing config
         elif var_name.upper() in ('TIMI', 'TIMING'):
-            self.rewriter.insertAfterToken(ctx.stop, '\r\n' + r'\timing ' + var_value) 
+            self.rewriter.insertAfterToken(ctx.stop, self.NEW_LINE + r'\timing ' + var_value) 
         
     # Exit a parse tree produced by PlSqlParser#define_command.
     def exitDefine_command(self, ctx:PlSqlParser.Define_commandContext):
@@ -193,11 +194,11 @@ class PlSql2PostgreListener(PlSqlParserListener):
     def exitNative_datatype_element(self, ctx:PlSqlParser.Native_datatype_elementContext):
        # convert datatype
         if len(ctx.children) == 1:
-            if ctx.start.text in self.DATA_TYPE.keys():
-                self.rewriter.replaceSingleToken(ctx.start, self.DATA_TYPE[token.text])
+            if ctx.start.text.upper() in self.DATA_TYPE.keys():
+                self.rewriter.replaceSingleToken(ctx.start, self.DATA_TYPE[ctx.start.text.upper()])
         else:
             # convert LONG ROW type
-            if ctx.start.text == 'LONG':
+            if ctx.start.text.upper() == 'LONG':
                 self.rewriter.replaceSingleToken(ctx.start, 'BYTEA')
                 self.rewriter.replaceSingleToken(ctx.stop, '')
 
@@ -214,7 +215,7 @@ class PlSql2PostgreListener(PlSqlParserListener):
     # Exit a parse tree produced by PlSqlParser#anonymous_block.
     def exitAnonymous_block(self, ctx:PlSqlParser.Anonymous_blockContext):
         # insert DO statement
-        self.rewriter.replaceSingleToken(ctx.start, 'DO $$\r\n' + ctx.start.text)
+        self.rewriter.replaceSingleToken(ctx.start, 'DO $$' + self.NEW_LINE + ctx.start.text)
         self.rewriter.replaceSingleToken(ctx.stop, '$$' + ctx.stop.text)
 
     # Exit a parse tree produced by PlSqlParser#execute_immediate.
@@ -222,6 +223,27 @@ class PlSql2PostgreListener(PlSqlParserListener):
         # delete keyword immediate
         self.rewriter.replaceSingleToken(ctx.IMMEDIATE().symbol, '')
         
+    # Exit a parse tree produced by PlSqlParser#create_synonym.
+    def exitCreate_synonym(self, ctx:PlSqlParser.Create_synonymContext):
+        # delete public keyword
+        if ctx.PUBLIC():
+            self.rewriter.replaceSingleToken(ctx.PUBLIC().symbol, '')
+        # change synonym to view
+        self.rewriter.replaceSingleToken(ctx.SYNONYM().symbol, 'VIEW')
+        # change for keyword to "as select * from"
+        self.rewriter.replaceSingleToken(ctx.FOR().symbol, 'AS SELECT * FROM')
+
+    # Exit a parse tree produced by PlSqlParser#drop_synonym.
+    def exitDrop_synonym(self, ctx:PlSqlParser.Drop_synonymContext):
+        # delete public keyword
+        if ctx.PUBLIC():
+            self.rewriter.replaceSingleToken(ctx.PUBLIC().symbol, '')
+        # change synonym to view
+        self.rewriter.replaceSingleToken(ctx.SYNONYM().symbol, 'VIEW')
+        # change force to cascade
+        if ctx.FORCE():
+            self.rewriter.replaceSingleToken(ctx.FORCE().symbol, 'CASCADE')
+
     # Enter a parse tree produced by PlSqlParser#query_block.
     def enterQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         # allocate select statement's infomation area
@@ -298,10 +320,10 @@ class PlSql2PostgreListener(PlSqlParserListener):
                 self.rewriter.replaceSingleToken(token, '/* ' + token.text)
                 token = ctx.external_table_clause().stop
                 self.rewriter.replaceSingleToken(token, token.text + ' */')
-                new_txt = '\r\nSERVER ' + self.EXT_FSERVER_NAME
-                new_txt = new_txt + '\r\nOPTIONS ('
-                new_txt = new_txt + "\r\n    FILENAME " + crtl_element['file_location']
-                new_txt = new_txt + '\r\n)'
+                new_txt = self.NEW_LINE + 'SERVER ' + self.EXT_FSERVER_NAME
+                new_txt = new_txt + self.NEW_LINE + 'OPTIONS ('
+                new_txt = new_txt + self.NEW_LINE + "    FILENAME " + crtl_element['file_location']
+                new_txt = new_txt + self.NEW_LINE + ')'
                 self.rewriter.insertAfterToken(token, new_txt)
 
     # Exit a parse tree produced by PlSqlParser#create_table.
