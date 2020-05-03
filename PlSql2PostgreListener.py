@@ -244,6 +244,14 @@ class PlSql2PostgreListener(PlSqlParserListener):
         if ctx.FORCE():
             self.rewriter.replaceSingleToken(ctx.FORCE().symbol, 'CASCADE')
 
+    # Exit a parse tree produced by PlSqlParser#drop_view.
+    def exitDrop_view(self, ctx:PlSqlParser.Drop_viewContext):
+        # force to cascade and delete constraints
+        if ctx.CASCADE():
+            self.rewriter.replaceSingleToken(ctx.CONSTRAINTS().symbol, '')
+        else:
+            self.rewriter.replaceSingleToken(ctx.SEMICOLON().symbol, ' CASCADE;')
+
     # Enter a parse tree produced by PlSqlParser#query_block.
     def enterQuery_block(self, ctx:PlSqlParser.Query_blockContext):
         # allocate select statement's infomation area
