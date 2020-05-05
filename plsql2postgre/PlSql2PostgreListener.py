@@ -1,11 +1,11 @@
 import re
 
-from antlr4                     import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from antlr4                                     import *
+from antlr4.TokenStreamRewriter                 import TokenStreamRewriter
 
-from PlSqlParserListener        import PlSqlParserListener
-from PlSqlParser                import PlSqlParser
-from PlSqlLexer                 import PlSqlLexer
+from plsql2postgre.PlSqlParserListener          import PlSqlParserListener
+from plsql2postgre.PlSqlParser                  import PlSqlParser
+from plsql2postgre.PlSqlLexer                   import PlSqlLexer
 
 
 class PlSql2PostgreListener(PlSqlParserListener):

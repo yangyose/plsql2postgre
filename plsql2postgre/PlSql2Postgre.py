@@ -1,11 +1,11 @@
 import sys
 import os
 
-from antlr4                 import CommonTokenStream, ParseTreeWalker, FileStream, InputStream
-from PlSqlLexer             import PlSqlLexer
-from PlSqlParser            import PlSqlParser
-from PlSql2PostgreListener  import PlSql2PostgreListener
-from CaseChangingStream     import CaseChangingStream
+from antlr4                                 import CommonTokenStream, ParseTreeWalker, FileStream, InputStream
+from plsql2postgre.PlSqlLexer               import PlSqlLexer
+from plsql2postgre.PlSqlParser              import PlSqlParser
+from plsql2postgre.PlSql2PostgreListener    import PlSql2PostgreListener
+from plsql2postgre.CaseChangingStream       import CaseChangingStream
 
 DEFAULT_ENCODING = 'ansi'
 DEFAULT_FILE_NAME = '.\work\output.postgre.sql'
