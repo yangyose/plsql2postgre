@@ -1,2 +1,4 @@
-# PlSql2Postgre
-for personal use(not finished yet)
+# plsql2postgre
+SQL converter from Oracle to PostgreSQL
+----------------------------------------
+under construction ......
