@@ -1,11 +1,16 @@
 import re
 
-from antlr4                                     import *
-from antlr4.TokenStreamRewriter                 import TokenStreamRewriter
+from antlr4                     import TokenStream, TerminalNode
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from plsql2postgre.PlSqlParserListener          import PlSqlParserListener
-from plsql2postgre.PlSqlParser                  import PlSqlParser
-from plsql2postgre.PlSqlLexer                   import PlSqlLexer
+if __name__ is not None and "." in __name__:
+    from .PlSqlParserListener   import PlSqlParserListener
+    from .PlSqlParser           import PlSqlParser
+    from .PlSqlLexer            import PlSqlLexer
+else:
+    from PlSqlParserListener    import PlSqlParserListener
+    from PlSqlParser            import PlSqlParser
+    from PlSqlLexer             import PlSqlLexer
 
 
 class PlSql2PostgreListener(PlSqlParserListener):

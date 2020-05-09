@@ -14,7 +14,7 @@ from PyQt4.QtGui import *
 # antlr_runtime_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '.'))
 # sys.path.insert(0, antlr_runtime_path)
 from antlr4 import *
-from CaseChangingStream     import CaseChangingStream
+from plsql2postgre.casechangingstream     import CaseChangingStream
 
 
 # this is a python version of TestRig

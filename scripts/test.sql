@@ -1,6 +1,0 @@
-DO $$
-DECLARE
-cnt INTEGER;
-BEGIN
-NULL;
-END$$;
