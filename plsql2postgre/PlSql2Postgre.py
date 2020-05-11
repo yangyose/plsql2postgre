@@ -18,7 +18,7 @@ else:
     from plsql2postgrelistener  import PlSql2PostgreListener
     from CaseChangingStream     import CaseChangingStream
 
-DEFAULT_ENCODING = 'ansi'
+DEFAULT_ENCODING = 'Shift_JIS'
 DEFAULT_FILE_NAME = r'.\tests\data\output.postgre.sql'
 
 class PlSql2Postgre:
