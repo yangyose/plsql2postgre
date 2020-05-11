@@ -32,10 +32,10 @@ jobs:
         format: 'csv'
     - name: Lint with pylint
       run: |
-        mapfile -d ',' -t added_modified_files < <(printf '%s,' '${{ steps.files.outputs.added_modified }}')
-        for added_modified_file in "${added_modified_files[@]}"; do
+        $added_modified_files = (${{ steps.files.outputs.added_modified }} -split ",")
+        foreach ($added_modified_file in ${added_modified_files) {
           pylint added_modified_file
-        done
+        }
       #run: |
       # stop the build if there are errors in pylint check
       #  pylint plsql2postgre
