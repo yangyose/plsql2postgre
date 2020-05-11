@@ -27,10 +27,11 @@ jobs:
         pip install xlrd pylint pytest
         pip install -r requirements.txt
     - name: Lint with pylint
-      run: |
-        # stop the build if there are errors in pylint check
-        pylint plsql2postgre
-        pylint tests
+      uses: cclauss/GitHub-Action-for-pylint@0.7.0
+      #run: |
+      # stop the build if there are errors in pylint check
+      #  pylint plsql2postgre
+      #  pylint tests
     - name: Test with pytest
       run: |
         pytest
