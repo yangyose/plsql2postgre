@@ -23,9 +23,13 @@ setup(
     long_description=LONG_DESCRIPTION,
     packages=['plsql2postgre'],
     include_package_data=True,
-    scripts=['scripts/pygrun', 'scripts/antlr4env.bat', 'scripts/pyanalyzeenv.bat'],
+    scripts=[
+        'scripts/pygrun',
+        'scripts/antlr4env.bat',
+        'scripts/pyanalyzeenv.bat',
+        'scripts/venvscript.bat',
+    ],
     install_requires=[
-        'pytest',
         'antlr4-python3-runtime',
     ],
     platforms='any',
