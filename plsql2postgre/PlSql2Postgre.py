@@ -11,12 +11,12 @@ if __name__ is not None and "." in __name__:
     from .PlSqlLexer            import PlSqlLexer
     from .PlSqlParser           import PlSqlParser
     from .plsql2postgrelistener import PlSql2PostgreListener
-    from .casechangingstream    import CaseChangingStream
+    from .CaseChangingStream    import CaseChangingStream
 else:
     from PlSqlLexer             import PlSqlLexer
     from PlSqlParser            import PlSqlParser
     from plsql2postgrelistener  import PlSql2PostgreListener
-    from casechangingstream     import CaseChangingStream
+    from CaseChangingStream     import CaseChangingStream
 
 DEFAULT_ENCODING = 'ansi'
 DEFAULT_FILE_NAME = r'.\tests\data\output.postgre.sql'

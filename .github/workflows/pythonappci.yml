@@ -29,7 +29,8 @@ jobs:
     - name: Lint with pylint
       run: |
         # stop the build if there are errors in pylint check
-        pylint --ignore-patterns=*Lexer.py,*Parser.py,*ParserListener.py --disable=r0903 **/*.py
+        pylint plsql2postgre
+        pylint tests
     - name: Test with pytest
       run: |
         pytest
