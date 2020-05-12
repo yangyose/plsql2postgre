@@ -33,8 +33,8 @@ jobs:
     - name: Lint with pylint
       run: |
         ("${{ steps.files.outputs.added_modified }}" -split ",") | Foreach-Object {
-          if (${_} -match "^.*\.py") {
-            pylint ${_}
+          if (${_} -match "^.*\.py") -and (${_} -notmatch "^.*(Lexer|Parser|ParserListener|CaseChangingStream)\.py") {
+              pylint ${_}
           }
         }
       #  foreach (added_modified_file in "${added_modified_files[@]}") {
