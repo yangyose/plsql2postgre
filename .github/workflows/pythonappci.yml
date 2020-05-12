@@ -33,7 +33,7 @@ jobs:
     - name: Lint with pylint
       run: |
         ("${{ steps.files.outputs.added_modified }}" -split ",") | Foreach-Object {
-          if (${_} -match "^.*\.py") -and (${_} -notmatch "^.*(Lexer|Parser|ParserListener|CaseChangingStream)\.py") {
+          if ((${_} -match "^.*\.py") -and (-not ${_} -match "^.*(Lexer|Parser|ParserListener|CaseChangingStream)\.py")) {
               pylint ${_}
           }
         }
