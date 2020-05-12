@@ -32,8 +32,9 @@ jobs:
         format: 'csv'
     - name: Lint with pylint
       run: |
-        ${added_modified_files} = ("${{ steps.files.outputs.added_modified }}" -split ",")
-        echo ${added_modified_files}
+        ("${{ steps.files.outputs.added_modified }}" -split ",") | Foreach-Object {
+          echo ${_}
+        }
       #  foreach (added_modified_file in "${added_modified_files[@]}") {
       #    pylint ${added_modified_file}
       #  }
