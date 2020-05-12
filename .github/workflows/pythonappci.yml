@@ -33,7 +33,7 @@ jobs:
     - name: Lint with pylint
       run: |
         ("${{ steps.files.outputs.added_modified }}" -split ",") | Foreach-Object {
-          echo ${_}
+          pylint ${_}
         }
       #  foreach (added_modified_file in "${added_modified_files[@]}") {
       #    pylint ${added_modified_file}
