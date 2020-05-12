@@ -1,3 +1,4 @@
 plsql2postgre/__pycache__
 tests/__pycache__
 .vscode/
+.coverage

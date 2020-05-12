@@ -1,0 +1,8 @@
+[run]
+omit = 
+    plsql2postgre\*Lexer.py
+    plsql2postgre\*Parser.py
+    plsql2postgre\*ParserListener.py
+    plsql2postgre\CaseChangingStream.py
+    plsql2postgre\plsql2postgre.py
+    plsql2postgre\__init__.py
