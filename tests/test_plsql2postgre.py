@@ -1,4 +1,4 @@
-"""Automatic acceptance test for plsql2postgre by pytest framework.
+"""Automatic unit test for plsql2postgre by pytest framework.
 
     [class]LoadData - Get test datas from test cases.
     [class]TestRun  - Run test using test datas.

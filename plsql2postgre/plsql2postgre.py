@@ -1,6 +1,6 @@
 """Provide main module of plsql2postgre.
 
-    [class]PlSql2Postgre - Run converter from oracle to postgreSQL.
+    [class]PlSql2Postgre - Convert script from oracle to postgreSQL.
     [routine]main - Provide the main entry for converter.
 """
 import sys
@@ -22,7 +22,7 @@ DEFAULT_ENCODING = 'Shift_JIS'
 DEFAULT_FILE_NAME = r'.\tests\data\output.postgre.sql'
 
 class PlSql2Postgre:
-    """Run converter from oracle to postgreSQL.
+    """Converte script from oracle to postgreSQL.
 
         [method]run - Run converter from oracle to postgreSQL.
     """

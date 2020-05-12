@@ -1,4 +1,4 @@
-"""Provide the class to change the string's case.
+"""Provide the class to change the string's case from ANTLR4.
 
     [class]CaseChangingStream - Change the string's case.
 """
