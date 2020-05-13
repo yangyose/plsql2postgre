@@ -24,7 +24,7 @@ jobs:
       run: |
         pip install wheel
         python -m pip install --upgrade pip
-        pip install xlrd pylint pytest
+        pip install xlrd pylint pytest pytest-cov
         pip install -r requirements.txt
     - id: files
       uses: jitterbit/get-changed-files@v1
@@ -37,13 +37,6 @@ jobs:
               pylint ${_}
           }
         }
-      #  foreach (added_modified_file in "${added_modified_files[@]}") {
-      #    pylint ${added_modified_file}
-      #  }
-      #run: |
-      # stop the build if there are errors in pylint check
-      #  pylint plsql2postgre
-      #  pylint tests
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov=plsql2postgre --cov-report term-missing
