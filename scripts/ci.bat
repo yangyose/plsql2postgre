@@ -8,8 +8,8 @@
 @if %pyok% equ 0 (@echo Install python v3.6.3......)&(@start /wait packages\python-3.6.3-amd64.exe /qn)
 
 @echo Python is installed. Now upgrade pip and setuptools......
-rem @pip install wheel >nul
-rem @python -m pip install --upgrade pip setuptools >nul
+@rem @pip install wheel >nul
+@rem @python -m pip install --upgrade pip setuptools >nul
 
 @echo Create virtual environment......
 @python -m venv venv
