@@ -280,6 +280,15 @@ class PlSql2PostgreListener(PlSqlParserListener):
         else:
             self.rewriter.replaceSingleToken(ctx.SEMICOLON().symbol, ' CASCADE;')
 
+    def exitDrop_function(self, ctx: PlSqlParser.Drop_functionContext):
+        """Exit a parse tree produced by PlSqlParser#drop_function."""
+        #Force to cascade and add parameters list
+        self.rewriter.replaceSingleToken(ctx.stop, '() CASCADE;')
+
+    def exitAlter_function(self, ctx: PlSqlParser.Alter_functionContext):
+        """Exit a parse tree produced by PlSqlParser#alter_function."""
+        self.__comment_context(ctx)
+
     def enterQuery_block(self, ctx: PlSqlParser.Query_blockContext):
         """Enter a parse tree produced by PlSqlParser#query_block."""
         #Allocate select statement's infomation area
